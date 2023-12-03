@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from enum import StrEnum
 from typing import Self, Any
+from functools import reduce
+from operator import mul
 
 MappedEngineT = list[list["Node"]]
 
@@ -229,6 +231,27 @@ class Node:
 
         return False
 
+    def is_gear(self) -> tuple[bool, list[Self]]:
+        # If this Node is star symbol
+        if self.type == NodeTypeEnum.symbol and self.value == "*":
+            # Get NUM neighbors
+            unique_neighbors = self.neighbors()
+            adjacent_parts = [node for node in unique_neighbors if node.type == NodeTypeEnum.num]
+
+            # Has to have at least 2 num neighbor nodes
+            if len(adjacent_parts) >= 2:
+                return True, adjacent_parts
+
+        return False, []
+
+    def gear_ratio(self) -> int | None:
+        is_gear, adjacent_parts = self.is_gear()
+        if is_gear:
+            adjacent_parts_values = [node.value for node in adjacent_parts]
+            return reduce(mul, adjacent_parts_values)
+
+        return None
+
 
 def engine_row_mapping(engine_row: str, row_index: int):
     index_stack = []
@@ -308,6 +331,17 @@ def find_engine_parts(mapped_engine: MappedEngineT) -> list[Node]:
     return engine_parts
 
 
+def find_gears(mapped_engine: MappedEngineT):
+    gear_nodes = []
+    for row in mapped_engine:
+        for node in row:
+            is_gear, num_nodes = node.is_gear()
+            if is_gear:
+                gear_nodes.append((node, num_nodes))
+
+    return gear_nodes
+
+
 if __name__ == "__main__":
     # Create mapped engine
     mapped_engine = engine_mapping(engine_map=input_engine)
@@ -317,7 +351,7 @@ if __name__ == "__main__":
 
     # Set TEST NODE ZERO location on engine map and evaluate if it's a part of the engine.
     # Uncomment below for testing
-    test_node_0 = localize_node(mapped_engine=mapped_engine, row_number=0, index=27)
+    # test_node_0 = localize_node(mapped_engine=mapped_engine, row_number=0, index=27)
     # print("test node 0:", test_node_0)
     # print("is left edge:", test_node_0.is_left_edge())
     # print("is right edge", test_node_0.is_right_edge())
@@ -338,3 +372,13 @@ if __name__ == "__main__":
 
     engine_part_nodes_values = [node.value for node in engine_part_nodes]
     print("Happy number:", sum(engine_part_nodes_values))
+
+    # Part Two - find gears
+    print("\nPart Two")
+    gears = find_gears(mapped_engine=mapped_engine)
+    ratios = []
+    for gear in gears:
+        gear_node, adjacent_parts = gear
+        print(f"Gear {gear_node} adjacent to {adjacent_parts}")
+        ratios.append(gear_node.gear_ratio())
+    print("Happy number:", sum(ratios))
