@@ -1,10 +1,12 @@
 """
-First task: 2720
-
+Part 1: 2720
+Part 2: 71535
 """
 
 from typing import Literal, Self
 import re
+from functools import reduce
+from operator import mul
 
 
 CubeColorT = Literal["red", "green", "blue"]
@@ -49,10 +51,10 @@ class GameSet(ReprMixin):
     def extend_cubes(self, cubes: list[Cube]):
         self.cubes.extend(cubes)
 
-    def get_cubes(self, color: CubeColorT) -> list[Cube]:
+    def cubes(self, color: CubeColorT) -> list[Cube]:
         return [cube for cube in self.cubes if cube.color == color]
 
-    def color_sum(self, color: CubeColorT) -> int:
+    def cubes_sum(self, color: CubeColorT) -> int:
         return len([cube for cube in self.cubes if cube.color == color])
 
 
@@ -72,7 +74,24 @@ class CubeGame(ReprMixin):
 
     def revealed_cubes(self, color: CubeColorT):
         """Revealed Cubes by color for the entire game - in every GameSet"""
-        return [game_set.get_cubes(color=color) for game_set in self.game_sets]
+        return [game_set.cubes(color=color) for game_set in self.game_sets]
+
+    def minimum_cubes_per_color(self, colors: list[CubeColorT]):
+        """
+        - Find the highest value for every color in every set
+
+        """
+        result = {}
+        for color in colors:
+            highest_value = -1
+            for game_set in self.game_sets:
+                cubes_of_same_color_count = game_set.cubes_sum(color=color)
+                if cubes_of_same_color_count > highest_value:
+                    highest_value = cubes_of_same_color_count
+
+            result.setdefault(color, highest_value)
+
+        return result
 
 
 def game_factory(game_record: str) -> CubeGame:
@@ -111,15 +130,13 @@ game_list_web_example = normalized_games(input_web_example)
 
 
 # Find impossible games according to rules - restricted number of cubes in one set.
-def resolve_impossible_game(
-    game: CubeGame, for_color: CubeColorT, max_in_bag: int
-) -> bool:
+def resolve_impossible_game(game: CubeGame, for_color: CubeColorT, max_in_bag: int) -> bool:
     """Returns True if the game is impossible"""
     # print(game.game_number)
 
     # Get SUM of colors for every set in the game
     for game_set in game.game_sets:
-        cubes_in_set_with_same_color = game_set.color_sum(color=for_color)
+        cubes_in_set_with_same_color = game_set.cubes_sum(color=for_color)
 
         # If there is more colors revealed in one set then in the entire bag, the game is not possible
         if cubes_in_set_with_same_color > max_in_bag:
@@ -137,9 +154,7 @@ def find_impossible_games(rules: dict[CubeColorT, int]):
 
     for game in game_list_all:
         for color, max_in_bag in rules.items():
-            is_impossible = resolve_impossible_game(
-                game=game, for_color=color, max_in_bag=max_in_bag
-            )
+            is_impossible = resolve_impossible_game(game=game, for_color=color, max_in_bag=max_in_bag)
             if is_impossible and game not in impossible_games:
                 impossible_games.append(game)
                 break
@@ -150,18 +165,41 @@ def find_impossible_games(rules: dict[CubeColorT, int]):
 
 
 if __name__ == "__main__":
-    # Find impossible games
-    rules: dict[CubeColorT, int] = {"red": 12, "green": 13, "blue": 14}
-    possible_games, impossible_games = find_impossible_games(rules)
+    part_one = True
+    part_two = True
 
-    print("Impossible sum:", len(impossible_games))
-    print("Possible sum:", len(possible_games))
-    checksum = len(impossible_games) + len(possible_games)
-    if checksum > len(input_all_games):
-        raise ValueError(
-            f"Checksum value {checksum} can't be higher the list of all games {len(input_all_games)} "
-        )
-    print("Checksum:", checksum)
+    # Part 1: Find impossible games
+    if part_one:
+        print("PART ONE")
+        rules: dict[CubeColorT, int] = {"red": 12, "green": 13, "blue": 14}
+        possible_games, impossible_games = find_impossible_games(rules)
 
-    possible_ids = [game.game_number for game in possible_games]
-    print("Happy number", sum(possible_ids))
+        print("Impossible sum:", len(impossible_games))
+        print("Possible sum:", len(possible_games))
+        checksum = len(impossible_games) + len(possible_games)
+        if checksum > len(input_all_games):
+            raise ValueError(f"Checksum value {checksum} can't be higher the list of all games {len(input_all_games)} ")
+        print("Checksum:", checksum)
+
+        possible_ids = [game.game_number for game in possible_games]
+        print("Happy number", sum(possible_ids))
+
+    # Part 2: Find minimum cubes in the bag
+    if part_two:
+        print("\nPART TWO")
+        multiply_results = []
+        colors = ["red", "green", "blue"]
+        for game in game_list_all:
+            minimum_cubes_per_color = game.minimum_cubes_per_color(colors=colors)
+            cube_set_multiplied = reduce(mul, minimum_cubes_per_color.values())  # Multiply numbers together
+            multiply_results.append(cube_set_multiplied)
+            print(
+                "Game ID",
+                game.game_number,
+                "has minimum set of cubes:",
+                minimum_cubes_per_color,
+                "with multiply result:",
+                cube_set_multiplied,
+            )
+
+        print("Happy number:", sum(multiply_results))
