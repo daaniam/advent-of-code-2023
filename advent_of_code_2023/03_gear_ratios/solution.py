@@ -352,19 +352,19 @@ if __name__ == "__main__":
 
     # Set TEST NODE ZERO location on engine map and evaluate if it's a part of the engine.
     # Uncomment below for testing
-    # test_node_0 = localize_node(mapped_engine=mapped_engine, row_number=0, index=27)
-    # print("test node 0:", test_node_0)
-    # print("is left edge:", test_node_0.is_left_edge())
-    # print("is right edge", test_node_0.is_right_edge())
-    # print("is top edge", test_node_0.is_top_edge())
-    # print("Node on right:", test_node_0.node_on_right())
-    # print("Node on left:", test_node_0.node_on_left())
-    # print("above", test_node_0.nodes_above())
-    # print("below", test_node_0.nodes_below())
-    # print("neighbors not unique", test_node_0.neighbors(unique=False))
-    # print("neighbors unique    ", test_node_0.neighbors())
-    # print("symbol nodes:", test_node_0.adjacent_symbol_nodes())
-    # print("is engine part?", test_node_0.is_engine_part())
+    test_node_0 = localize_node(mapped_engine=mapped_engine, row_number=0, index=27)
+    print("test node 0:", test_node_0)
+    print("is left edge:", test_node_0.is_left_edge())
+    print("is right edge", test_node_0.is_right_edge())
+    print("is top edge", test_node_0.is_top_edge())
+    print("Node on right:", test_node_0.node_on_right())
+    print("Node on left:", test_node_0.node_on_left())
+    print("above", test_node_0.nodes_above())
+    print("below", test_node_0.nodes_below())
+    print("neighbors not unique", test_node_0.neighbors(unique=False))
+    print("neighbors unique    ", test_node_0.neighbors())
+    print("symbol nodes:", test_node_0.adjacent_symbol_nodes())
+    print("is engine part?", test_node_0.is_engine_part())
 
     # Find Nodes which are engine parts
     engine_part_nodes = find_engine_parts(mapped_engine=mapped_engine)
@@ -375,11 +375,11 @@ if __name__ == "__main__":
     print("Happy number:", sum(engine_part_nodes_values))
 
     # Part Two - find gears
-    print("\nPart Two")
-    gears = find_gears(mapped_engine=mapped_engine)
-    ratios = []
-    for gear in gears:
-        gear_node, adjacent_parts = gear
-        print(f"Gear {gear_node} adjacent to {adjacent_parts}")
-        ratios.append(gear_node.gear_ratio())
-    print("Happy number:", sum(ratios))
+    # print("\nPart Two")
+    # gears = find_gears(mapped_engine=mapped_engine)
+    # ratios = []
+    # for gear in gears:
+    #     gear_node, adjacent_parts = gear
+    #     print(f"Gear {gear_node} adjacent to {adjacent_parts}")
+    #     ratios.append(gear_node.gear_ratio())
+    # print("Happy number:", sum(ratios))
